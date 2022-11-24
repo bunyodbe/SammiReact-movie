@@ -1,6 +1,8 @@
 import { Component } from "react";
+// Id
+import { v4 as uuidv4 } from "uuid";
+// Styles
 import "./movies-add-form.css";
-
 class MoviesAddForm extends Component {
   constructor(props) {
     super(props);
@@ -10,8 +12,22 @@ class MoviesAddForm extends Component {
     };
   }
 
+  // Change Input Value
+
   onInputChange = (e) => {
     this.setState({ [e.target.name]: e.target.value });
+  };
+
+  // Send Input Values
+
+  onSubmitEvent = (e) => {
+    e.preventDefault();
+    this.props.onAdd({
+      name: this.state.name,
+      viewers: this.state.viewers,
+      id: uuidv4(),
+    });
+    this.setState({ name: "", viewers: "" });
   };
 
   render() {
@@ -19,7 +35,12 @@ class MoviesAddForm extends Component {
     return (
       <div className="movie-add-form">
         <h3>Yangi kino qo'shish</h3>
-        <form className="d-flex add-form">
+        <form
+          onSubmit={(e) => {
+            this.onSubmitEvent(e);
+          }}
+          className="d-flex add-form"
+        >
           <input
             type="text"
             className="form-control new-post-label"
