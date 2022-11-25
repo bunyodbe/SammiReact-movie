@@ -23,9 +23,10 @@ class App extends Component {
         },
         { name: "Ertugul", viewers: 200, fovourite: false, like: false, id: 2 },
         { name: "Omar", viewers: 300, fovourite: false, like: false, id: 3 },
-        { name: "Elchi", viewers: 800, fovourite: false, like: false, id: 4 },
+        { name: "Elchi", viewers: 800, fovourite: false, like: true, id: 4 },
       ],
       term: "",
+      filter: "all",
     };
   }
 
@@ -65,17 +66,35 @@ class App extends Component {
     return arr.filter((item) => item.name.toLowerCase().indexOf(term) > -1);
   };
 
-  // Update Term
+  // Filter Handler
 
-  updateTermHandler = (term) => {
-    this.setState({ term });
+  filterHandler = (arr, filter) => {
+    switch (filter) {
+      case "popular":
+        return arr.filter((item) => item.viewers > 400);
+      case "like":
+        return arr.filter((item) => item.like);
+      default:
+        return arr;
+    }
   };
 
+  // Update Term
+
+  updateTermHandler = (term) => this.setState({ term });
+
+  // update filter
+
+  updateFilterHandler = (filter) => this.setState({ filter });
+
   render() {
-    const { db, term } = this.state;
+    const { db, term, filter } = this.state;
     const allMovieCount = db.length;
     const fovouriteMovieCount = db.filter((c) => c.fovourite).length;
-    const visableData = this.searchHandler(db, term);
+    const visableData = this.filterHandler(
+      this.searchHandler(db, term),
+      filter
+    );
     return (
       <div className="app font-monospace">
         <div className="content">
@@ -85,7 +104,10 @@ class App extends Component {
           />
           <div className="search-box">
             <AppSearch updateTermHandler={this.updateTermHandler} />
-            <AppFilter />
+            <AppFilter
+              filter={filter}
+              updateFilterHandler={this.updateFilterHandler}
+            />
           </div>
           <MovieList
             movies={visableData}
