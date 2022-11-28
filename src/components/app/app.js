@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState } from "react";
 import AppFilter from "../app-filter/app-filter";
 import AppInfo from "../app-info/app-info";
 import AppSearch from "../app-search/app-search";
@@ -9,66 +9,34 @@ import { v4 as uuidv4 } from "uuid";
 // Styles
 import "./app.css";
 
-class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      db: [
-        {
-          name: "Empire of Osman",
-          viewers: 900,
-          fovourite: false,
-          like: false,
-          id: 1,
-        },
-        { name: "Ertugul", viewers: 200, fovourite: false, like: false, id: 2 },
-        { name: "Omar", viewers: 300, fovourite: false, like: false, id: 3 },
-        { name: "Elchi", viewers: 800, fovourite: false, like: true, id: 4 },
-      ],
-      term: "",
-      filter: "all",
-    };
-  }
+const App = () => {
+  const [data, setData] = useState(arr);
+  const [term, setTerm] = useState("");
+  const [filter, setFilter] = useState("all");
 
-  // Delete item from db
+  const onDelete = (id) => setData(data.filter((del) => del.id !== id));
+  const onAdd = (item) =>
+    setData([
+      ...data,
+      { ...item, id: uuidv4(), fovourite: false, like: false },
+    ]);
 
-  onDelete = (id) => {
-    this.setState(({ db }) => ({ db: db.filter((del) => del.id !== id) }));
-  };
+  const onToggleProp = (id, prop) =>
+    data.map((item) => {
+      if (item.id == id) {
+        return { ...item, [prop]: !item[prop] };
+      }
+      return item;
+    });
 
-  // Add item to db
-
-  onAdd = (item) => {
-    this.setState(({ db }) => ({
-      db: [...db, { ...item, id: uuidv4(), fovourite: false, like: false }],
-    }));
-  };
-
-  // add fovourite or like
-
-  onToggleProp = (id, prop) => {
-    this.setState(({ db }) => ({
-      db: db.map((item) => {
-        if (item.id == id) {
-          return { ...item, [prop]: !item[prop] };
-        }
-        return item;
-      }),
-    }));
-  };
-
-  // Search Handler
-
-  searchHandler = (arr, term) => {
+  const searchHandler = (arr, term) => {
     if (term.length === 0) {
       return arr;
     }
     return arr.filter((item) => item.name.toLowerCase().indexOf(term) > -1);
   };
 
-  // Filter Handler
-
-  filterHandler = (arr, filter) => {
+  const filterHandler = (arr, filter) => {
     switch (filter) {
       case "popular":
         return arr.filter((item) => item.viewers > 400);
@@ -79,46 +47,45 @@ class App extends Component {
     }
   };
 
-  // Update Term
+  const updateTermHandler = (term) => setTerm(term);
+  const updateFilterHandler = (filter) => setFilter(filter);
 
-  updateTermHandler = (term) => this.setState({ term });
-
-  // update filter
-
-  updateFilterHandler = (filter) => this.setState({ filter });
-
-  render() {
-    const { db, term, filter } = this.state;
-    const allMovieCount = db.length;
-    const fovouriteMovieCount = db.filter((c) => c.fovourite).length;
-    const visableData = this.filterHandler(
-      this.searchHandler(db, term),
-      filter
-    );
-    return (
-      <div className="app font-monospace">
-        <div className="content">
-          <AppInfo
-            allMovieCount={allMovieCount}
-            fovouriteMovieCount={fovouriteMovieCount}
+  return (
+    <div className="app font-monospace">
+      <div className="content">
+        <AppInfo
+          allMovieCount={data.le}
+          fovouriteMovieCount={data.filter((c) => c.fovourite).length}
+        />
+        <div className="search-box">
+          <AppSearch updateTermHandler={updateTermHandler} />
+          <AppFilter
+            filter={filter}
+            updateFilterHandler={updateFilterHandler}
           />
-          <div className="search-box">
-            <AppSearch updateTermHandler={this.updateTermHandler} />
-            <AppFilter
-              filter={filter}
-              updateFilterHandler={this.updateFilterHandler}
-            />
-          </div>
-          <MovieList
-            movies={visableData}
-            onDelete={this.onDelete}
-            onToggleProp={this.onToggleProp}
-          />
-          <MoviesAddForm onAdd={this.onAdd} />
         </div>
+        <MovieList
+          movies={filterHandler(searchHandler(data, term), filter)}
+          onDelete={onDelete}
+          onToggleProp={onToggleProp}
+        />
+        <MoviesAddForm onAdd={onAdd} />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+const arr = [
+  {
+    name: "Empire of Osman",
+    viewers: 900,
+    fovourite: false,
+    like: false,
+    id: 1,
+  },
+  { name: "Ertugul", viewers: 200, fovourite: false, like: false, id: 2 },
+  { name: "Omar", viewers: 300, fovourite: false, like: false, id: 3 },
+  { name: "Elchi", viewers: 800, fovourite: false, like: true, id: 4 },
+];
 
 export default App;
